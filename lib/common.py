@@ -1,6 +1,7 @@
 import sys
 import re
 from datetime import datetime
+from zoneinfo import ZoneInfo
 
 class Common:
 
@@ -19,12 +20,7 @@ class Common:
         return int(re.sub(r"\.[0-9]+$", '', str(item)))
 
     @staticmethod
-    def getDateStringTimestamp(date):
-        dt    = datetime.strptime(date, "%Y-%m-%d %H:%M:%S")
-        t     = int(dt.timestamp())
-        return t
-
-    @staticmethod
-    def getTimestampDateString(i):
-        s = datetime.fromtimestamp(i).strftime('%Y-%m-%d %H:%M:%S')
-        return s
+    def getTimestampFromDateString(i):
+        dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S").replace(tzinfo=ZoneInfo("Europe/Madrid"))
+        i  = int(dt.timestamp())
+        return i

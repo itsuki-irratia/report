@@ -19,8 +19,8 @@ until_ts      = Common.getDateStringTimestamp(arguments['until'])
 
 interval = 3600
 for i in range(since_ts, until_ts, interval):
-    _since = Common.getTimestampDateString(i)
-    _until = Common.getTimestampDateString(i+interval-1)
+    _since = Common.getTimestampFromDateString(i)
+    _until = Common.getTimestampFromDateString(i+interval-1)
 
     command = f"{command} --log-file=\"{log_file}\" --since=\"{_since}\" --until=\"{_until}\" --output-mode=\"basic\""
     output  = os.popen(command).read().strip()
