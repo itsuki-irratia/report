@@ -20,7 +20,12 @@ class Common:
         return int(re.sub(r"\.[0-9]+$", '', str(item)))
 
     @staticmethod
-    def getTimestampFromDateString(i):
-        dt = datetime.strptime(i, "%Y-%m-%d %H:%M:%S").replace(tzinfo=ZoneInfo("Europe/Madrid"))
+    def getTimestampFromDateString(ds):
+        dt = datetime.strptime(ds, "%Y-%m-%d %H:%M:%S").replace(tzinfo=ZoneInfo("Europe/Madrid"))
         i  = int(dt.timestamp())
         return i
+
+    @staticmethod
+    def getDateStringFromTimestamp(ts):
+        dt = datetime.fromtimestamp(int(ts), tz=ZoneInfo("Europe/Madrid"))
+        return dt.strftime("%Y-%m-%d %H:%M:%S")

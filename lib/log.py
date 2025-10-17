@@ -1,12 +1,11 @@
-import sys
 import json
 import re
-from datetime import datetime
 
-from .common import Common
-from .device import Device
-from .app import App
-from .geo import Geo
+from datetime import datetime
+from .common  import Common
+from .device  import Device
+from .app     import App
+from .geo     import Geo
 
 class Log:
     
@@ -16,16 +15,19 @@ class Log:
             content = f.read()
 
         log_lines = re.split(r"\n", content)
-        log_lines = [item for item in log_lines if item != '']
-        return log_lines
+        log_lines = [item for item in log_lines if item.strip() != '']
+
+        data = []
+        for log_line in log_lines:
+            data.append(json.loads(log_line))
+
+        return data
 
     @staticmethod
     def prepareLog(log, output_mode):
-        log_json  = json.loads(log)
-
-        request   = log_json['request']
+        request   = log['request']
         remote_ip = request['remote_ip']
-        ts        = Common.getTimestamp(log_json['ts'])
+        ts        = Common.getTimestamp(log['ts'])
         dt        = datetime.fromtimestamp(ts)
         uri       = request['uri']
         headers   = request['headers']
@@ -53,21 +55,20 @@ class Log:
     def getByDates(logs, since, until, output_mode):
         result = []
         for _log in logs:
-            log_json  = json.loads(_log)
-            request   = log_json['request']
+            request   = _log['request']
             remote_ip = request['remote_ip']
             uri       = request['uri']
 
             if Log.isUriAllowed == False:
                 continue
 
-            if log_json['status'] != 200:
+            if _log['status'] != 200:
                 continue
 
             if re.search(r"^192\.168\.", remote_ip):
                 continue
 
-            ts = Common.getTimestamp(log_json['ts'])
+            ts = Common.getTimestamp(_log['ts'])
 
             if ts>=since and ts<=until:
                 _log = Log.prepareLog(_log, output_mode)

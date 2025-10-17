@@ -5,6 +5,7 @@
 
 import sys
 import json
+import hashlib
 from datetime   import datetime
 
 from lib.common import Common
@@ -17,37 +18,56 @@ from lib.geo    import Geo
 
 class Report:
 
-    @staticmethod
-    def get(log_file, since, until, output_mode):
+    def __init__(self, log_file):
+        self.log_file    = log_file
+        self.cache       = None
 
-        _since         = Common.getTimestampFromDateString(since)
-        _until         = Common.getTimestampFromDateString(until)
-        logs          = Log.getLines(log_file)
+    def getCache(self):
+        if self.cache:
+            return self.cache
+        return None
 
-        logs          = Log.getByDates(logs, _since, _until, output_mode)
+    def setCache(self, value):
+        self.cache = value
+        return True
+
+    def get(self, since, until, output_mode):
+        self.since       = since
+        self.until       = until
+        self.output_mode = output_mode        
+
+        _since        = Common.getTimestampFromDateString(self.since)
+        _until        = Common.getTimestampFromDateString(self.until)
+
+        logs          = self.getCache()
+        if logs == None:
+            logs          = Log.getLines(self.log_file)
+            self.setCache(logs)
+
+        logs          = Log.getByDates(logs, _since, _until, self.output_mode)
 
         visits        = Visit.get(logs)
         visits_unique = Visit.getUnique(logs)
 
         result = {
-            "since":         since,
-            "until":         until,
+            "since":         self.since,
+            "until":         self.until,
             "visits":        visits,
             "visits_unique": visits_unique,
         }
 
-        if(output_mode == 'devices'):
+        if(self.output_mode == 'devices'):
             result['devices'] = Device.gets(logs)
 
-        elif(output_mode == 'apps'):
+        elif(self.output_mode == 'apps'):
             result['apps']    = App.gets(logs)
 
-        elif(output_mode == 'geos'):
+        elif(self.output_mode == 'geos'):
             result['geos_city']    = Geo.getCities(logs)
             result['geos_region']  = Geo.getRegions(logs)
             result['geos_country'] = Geo.getCountries(logs)
 
-        elif(output_mode == 'full'):
+        elif(self.output_mode == 'full'):
             result['visits_ogg']   = Visit.getOgg(logs)
             result['visits_mp3']   = Visit.getMp3(logs)
             result['devices']      = Device.gets(logs)
