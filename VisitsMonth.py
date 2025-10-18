@@ -10,32 +10,23 @@ from lib.report          import Report
 
 class VisitsMonth:
 
-    def __init__(self, log_file, since, until):
+    def __init__(self, log_file):
         self.log_file    = log_file
-        self.since       = since
-        self.until       = until
-        self.since_date  = re.sub(r"\s+[^$]+$", '', since)
         self.interval    = 3600 * 24
-        self.output_file = f"./build/visits-month-{self.since_date}.png"
+        self.report      = Report(log_file)
 
-    def get(self):
+    def get(self, since, until, output_mode):
+        since_date       = re.sub(r"\s+[^$]+$", '', since)
+        self.output_file = f"./build/visits-month-{since_date}.png"
+        since_ts         = Common.getTimestampFromDateString(since)
+        until_ts         = Common.getTimestampFromDateString(until)        
+        data             = []
 
-        log_file   = self.log_file
-        since      = self.since
-        until      = self.until
-        since_date = self.since_date
-        interval   = self.interval
-
-        since_ts   = Common.getTimestampFromDateString(since)
-        until_ts   = Common.getTimestampFromDateString(until)
-
-        r          = Report(log_file)
-        data       = []
-        for i in range(since_ts, until_ts, interval):
+        for i in range(since_ts, until_ts, self.interval):
             _since = datetime.fromtimestamp(i).strftime('%Y-%m-%d %H:%M:%S')
-            _until = datetime.fromtimestamp(i+interval-1).strftime('%Y-%m-%d %H:%M:%S')
+            _until = datetime.fromtimestamp(i+self.interval-1).strftime('%Y-%m-%d %H:%M:%S')
 
-            output = r.get(_since, _until, 'basic')
+            output = self.report.get(_since, _until, output_mode)
             print(output)
             data.append(output)
 
@@ -80,7 +71,7 @@ class VisitsMonth:
         #plt.show()
         return plt
 
-    def save(self):
-        graphic     = self.get()
+    def save(self, since, until, output_mode):
+        graphic = self.get(since, until, output_mode)
         graphic.savefig(self.output_file, dpi=300, bbox_inches='tight')
         print(f"VisitsMonth: saved: {self.output_file}")

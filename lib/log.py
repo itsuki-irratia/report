@@ -19,7 +19,9 @@ class Log:
 
         data = []
         for log_line in log_lines:
-            data.append(json.loads(log_line))
+            d       = json.loads(log_line)
+            d['ts'] = Common.getTimestamp(d['ts'])
+            data.append(d)
 
         return data
 
@@ -27,8 +29,7 @@ class Log:
     def prepareLog(log, output_mode):
         request   = log['request']
         remote_ip = request['remote_ip']
-        ts        = Common.getTimestamp(log['ts'])
-        dt        = datetime.fromtimestamp(ts)
+        dt        = datetime.fromtimestamp(log['ts'])
         uri       = request['uri']
         headers   = request['headers']
 
@@ -38,7 +39,7 @@ class Log:
             user_agent = '-'
 
         result = {
-            "dt":         str(dt),
+            "dt":         dt,
             "uri":        uri,
             "remote_ip":  remote_ip,
             "user_agent": user_agent
@@ -56,21 +57,17 @@ class Log:
         result = []
         for _log in logs:
             request   = _log['request']
-            remote_ip = request['remote_ip']
-            uri       = request['uri']
 
-            if Log.isUriAllowed == False:
+            if Log.isUriAllowed(request['uri']) == False:
                 continue
 
             if _log['status'] != 200:
                 continue
 
-            if re.search(r"^192\.168\.", remote_ip):
+            if re.search(r"^192\.168\.", request['remote_ip']):
                 continue
 
-            ts = Common.getTimestamp(_log['ts'])
-
-            if ts>=since and ts<=until:
+            if _log['ts']>=since and _log['ts']<=until:
                 _log = Log.prepareLog(_log, output_mode)
                 result.append(_log)
 
@@ -79,6 +76,8 @@ class Log:
     @staticmethod
     def isUriAllowed(uri):
         allowed = ['/itsuki.ogg', '/itsuki.mp3', '/itsuki.opus', '/itsuki.aac']
-        if uri in allowed:
-            return True
+        for i in allowed:
+            if re.search(rf"^{re.escape(i)}", uri):
+                return True
+
         return False
