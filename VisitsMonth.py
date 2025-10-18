@@ -75,3 +75,4 @@ class VisitsMonth:
         graphic = self.get(since, until, output_mode)
         graphic.savefig(self.output_file, dpi=300, bbox_inches='tight')
         print(f"VisitsMonth: saved: {self.output_file}")
+        return self.output_file
