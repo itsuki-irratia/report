@@ -32,11 +32,8 @@ md = f"""{md}
 Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{mont_data['visits']}**  
 Bisitari bakarrak: **{mont_data['visits_unique']}** 
 ![]({month_image})
+
 """
-
-print(md)
-
-sys.exit()
 
 # Eguneko bisitak
 
@@ -46,13 +43,19 @@ until_ts = Common.getTimestampFromDateString(until)
 interval = 3600 * 24
 
 for i in range(since_ts, until_ts, interval):
-    _since = Common.getDateStringFromTimestamp(i)
-    _until = Common.getDateStringFromTimestamp(i+interval-1)
+    _since   = Common.getDateStringFromTimestamp(i)
+    _until   = Common.getDateStringFromTimestamp(i+interval-1)
 
-    _m      = r.get(_since, _until, 'basic')
-    print(_m)
+    day_data  = r.get(_since, _until, 'basic')
+    day_image = VisitsDay(log_file).save(_since, _until, 'basic')
+    md = f"""{md}
+Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{day_data['visits']}**  
+Bisitari bakarrak: **{day_data['visits_unique']}** 
+![]({day_image})
 
-    #vp = VisitsDay(log_file).save(_since, _until, 'basic')
+    """
 
+with open("report.md", "w") as file:
+    file.write(md)
 
 sys.exit()

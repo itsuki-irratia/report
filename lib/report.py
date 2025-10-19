@@ -19,8 +19,8 @@ from lib.geo    import Geo
 class Report:
 
     def __init__(self, log_file):
-        self.log_file    = log_file
-        self.cache       = None
+        self.log_file = log_file
+        self.cache    = None
 
     def getCache(self):
         if self.cache:
@@ -32,42 +32,38 @@ class Report:
         return True
 
     def get(self, since, until, output_mode):
-        self.since       = since
-        self.until       = until
-        self.output_mode = output_mode        
+        _since = Common.getTimestampFromDateString(since)
+        _until = Common.getTimestampFromDateString(until)
+        logs   = self.getCache()
 
-        _since        = Common.getTimestampFromDateString(self.since)
-        _until        = Common.getTimestampFromDateString(self.until)
-
-        logs          = self.getCache()
         if logs == None:
             logs          = Log.getLines(self.log_file)
             self.setCache(logs)
 
-        logs          = Log.getByDates(logs, _since, _until, self.output_mode)
+        logs          = Log.getByDates(logs, _since, _until, output_mode)
 
         visits        = Visit.get(logs)
         visits_unique = Visit.getUnique(logs)
 
         result = {
-            "since":         self.since,
-            "until":         self.until,
+            "since":         since,
+            "until":         until,
             "visits":        visits,
             "visits_unique": visits_unique,
         }
 
-        if(self.output_mode == 'devices'):
+        if(output_mode == 'devices'):
             result['devices'] = Device.gets(logs)
 
-        elif(self.output_mode == 'apps'):
+        elif(output_mode == 'apps'):
             result['apps']    = App.gets(logs)
 
-        elif(self.output_mode == 'geos'):
+        elif(output_mode == 'geos'):
             result['geos_city']    = Geo.getCities(logs)
             result['geos_region']  = Geo.getRegions(logs)
             result['geos_country'] = Geo.getCountries(logs)
 
-        elif(self.output_mode == 'full'):
+        elif(output_mode == 'full'):
             result['visits_ogg']   = Visit.getOgg(logs)
             result['visits_mp3']   = Visit.getMp3(logs)
             result['devices']      = Device.gets(logs)
