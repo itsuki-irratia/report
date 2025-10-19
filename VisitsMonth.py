@@ -17,9 +17,9 @@ class VisitsMonth:
 
     def get(self, since, until, output_mode):
         since_date       = re.sub(r"\s+[^$]+$", '', since)
-        self.output_file = f"./build/visits-month-{since_date}.png"
+        self.output_file = f"./build/visits-month-{since_date}.svg"
         since_ts         = Common.getTimestampFromDateString(since)
-        until_ts         = Common.getTimestampFromDateString(until)        
+        until_ts         = Common.getTimestampFromDateString(until)
         data             = []
 
         for i in range(since_ts, until_ts, self.interval):
@@ -73,6 +73,6 @@ class VisitsMonth:
 
     def save(self, since, until, output_mode):
         graphic = self.get(since, until, output_mode)
-        graphic.savefig(self.output_file, dpi=300, bbox_inches='tight')
+        graphic.savefig(self.output_file, dpi=600, bbox_inches='tight')
         print(f"VisitsMonth: saved: {self.output_file}")
         return self.output_file

@@ -1,5 +1,6 @@
 lib/__pycache__
 build/*
+report/*
 *.log
 *.json
 *.pyc
