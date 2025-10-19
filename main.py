@@ -33,7 +33,6 @@ width = r"{ width=100% }"
 md    = f"""{md}
 ## {since_d}
 
-Hilabetea:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{since_d}**  
 Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{mont_data['visits']}**  
 Bisitari bakarrak: **{mont_data['visits_unique']}** 
 ![]({month_image}){width}
@@ -60,7 +59,6 @@ for i in range(since_ts, until_ts, interval):
     md = f"""{md}
 ## {_since_d}
 
-Eguna:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{_since_d}**  
 Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{day_data['visits']}**  
 Bisitari bakarrak: **{day_data['visits_unique']}** 
 ![]({day_image}){width}
@@ -91,7 +89,7 @@ Beraz, kenduketa eginda esan genezake bisitari bakar guztietatik (**{mont_data['
 with open(f"report/{since_d}.md", "w") as file:
     file.write(md)
 
-command = f"/usr/bin/pandoc report/{since_d}.md -f markdown --pdf-engine=weasyprint -o reports/{since_d}.pdf"
+command = f"/usr/bin/pandoc report/{since_d}.md -f markdown --pdf-engine=weasyprint -o report/{since_d}.pdf"
 os.system(command)
 
 sys.exit()
