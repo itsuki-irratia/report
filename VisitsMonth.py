@@ -43,7 +43,7 @@ class VisitsMonth:
 
         # Plot data
         ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
-        ax.plot(df.index, df["unique"], marker="s", label="Bisitari bakarrak")
+        ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
         ax.set_title(f"{since_date} hilabeteko bisitak")
 
         # Add value labels

@@ -42,7 +42,7 @@ class VisitsDay:
         fig, ax = plt.subplots(figsize=(12, 6))
 
         ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
-        ax.plot(df.index, df["unique"], marker="s", label="Bisitari bakarrak")
+        ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
         ax.set_title(f"{since_date} eguneko bisitak")
 
         # Add value labels with white background
