@@ -1,90 +1,117 @@
 import sys
 import os
 import re
+from collections import OrderedDict
 
+from pprint      import pprint
 from lib.common  import Common
+from lib.visit   import Visit
 from lib.report  import Report
 from VisitsMonth import VisitsMonth
 from VisitsDay   import VisitsDay
+from Geos        import Geos
+from Devices     import Devices
+from lib.md      import Md
 
 arguments = Common.getArguments()
 log_file  = arguments['log-file']
 since     = arguments['since']
 until     = arguments['until']
+since_d   = re.sub(r"\-[0-9]+\s+[0-9]+:[0-9]+:[0-9]+$", '', since)
+r         = Report(log_file)
+width     = r"{ width=100% }"
 
-md = f"""
----
-mainfont: "Liberation Mono"
-fontsize: 14pt
----
-# ITSUKI IRRATIAKO<br>ERREPORTE SISTEMA  
-<div style="page-break-after: always;"></div>
-"""
+def _Visits():
+    # Hilabeteko bisitak
+    mont_data     = r.get(since, until, 'basic')
+    duration_data = Visit.duration2Human(mont_data['duration'])
+    month_image   = VisitsMonth(log_file).save(since, until, 'basic')
 
-# Hilabeteko bisitak
+    md            = Md.visistsMonth(since_d, mont_data, duration_data, month_image, width)
 
-since_d = re.sub(r"\-[0-9]+\s+[0-9]+:[0-9]+:[0-9]+$", '', since)
+    # Eguneko bisitak
 
-r           = Report(log_file)
-mont_data   = r.get(since, until, 'basic')
-month_image = VisitsMonth(log_file).save(since, until, 'basic')
+    since_ts             = Common.getTimestampFromDateString(since)
+    until_ts             = Common.getTimestampFromDateString(until)
+    interval             = 3600 * 24
 
-width = r"{ width=100% }"
-md    = f"""{md}
-## {since_d}
+    month_visite_uniques = 0
 
-Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{mont_data['visits']}**  
-Bisitari bakarrak: **{mont_data['visits_unique']}** 
-![]({month_image}){width}
-<div style="page-break-after: always;"></div>
-"""
+    for i in range(since_ts, until_ts, interval):
+        _since               = Common.getDateStringFromTimestamp(i)
+        _until               = Common.getDateStringFromTimestamp(i+interval-1)
+        _since_d             = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", '', _since)
 
-# Eguneko bisitak
+        day_data             = r.get(_since, _until, 'basic')
+        day_image            = VisitsDay(log_file).save(_since, _until, 'basic')
+        month_visite_uniques = month_visite_uniques + day_data['unique']
 
-since_ts = Common.getTimestampFromDateString(since)
-until_ts = Common.getTimestampFromDateString(until)
-interval = 3600 * 24
+        md                   = f"""{md}
+{Md.visistsDay(since_d, day_data, day_image, width)}
+        """
 
-month_visite_uniques = 0
-for i in range(since_ts, until_ts, interval):
-    _since   = Common.getDateStringFromTimestamp(i)
-    _until   = Common.getDateStringFromTimestamp(i+interval-1)
-    _since_d = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", '', _since)
-
-    day_data  = r.get(_since, _until, 'basic')
-    day_image = VisitsDay(log_file).save(_since, _until, 'basic')
-
-    month_visite_uniques = month_visite_uniques + day_data['visits_unique']
-
+    rest_month_visit = month_visite_uniques - mont_data['unique']
     md = f"""{md}
-## {_since_d}
+{Md.notes(month_visite_uniques, mont_data, rest_month_visit)}
+    """
+    return md
 
-Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{day_data['visits']}**  
-Bisitari bakarrak: **{day_data['visits_unique']}** 
-![]({day_image}){width}
+def _Geos():
+    geo_data      = r.get(since, until, 'geos')
+    geos_city     = OrderedDict(sorted(geo_data['geos_city'].items(),    key=lambda x: x[1], reverse=True)[:20])
+    geos_region   = OrderedDict(sorted(geo_data['geos_region'].items(),  key=lambda x: x[1], reverse=True)[:20])
+    geos_country  = OrderedDict(sorted(geo_data['geos_country'].items(), key=lambda x: x[1], reverse=True)[:20])
+
+    city_image    = Geos().save('city',    since_d, geos_city)
+    region_image  = Geos().save('region',  since_d, geos_region)
+    country_image = Geos().save('country', since_d, geos_country)
+
+    md = f"""
+![]({city_image}){width}
+<div style="page-break-after: always;"></div>
+![]({region_image}){width}
+<div style="page-break-after: always;"></div>
+![]({country_image}){width}
+    """
+    """
+    pprint(geos_city)
+    pprint(geos_region)
+    pprint(geos_country)
+    """
+    return md
+
+def _Devices():
+    devices_data  = r.get(since, until, 'devices')['devices']
+    devices_data  = OrderedDict(sorted(devices_data.items(), key=lambda x: x[1], reverse=True))
+    devices_image = Devices().save(since_d, devices_data)
+
+    md = f"""
+![]({devices_image}){width}
 <div style="page-break-after: always;"></div>
     """
+    """
+    pprint(geos_city)
+    pprint(geos_region)
+    pprint(geos_country)
+    """
+    return md
 
-rest_month_visit = month_visite_uniques - mont_data['visits_unique']
-md = f"""{md}
-## OHARRAK
+def _Outro():
+    pass
 
-### BISITARI BAKARREN KALKULUA
-
-Hilabetearen bisitari bakarren kalkulua ez dator bat eguneko bisitari bakarren batuketarekin.
-
-**Zergatik?**
-
-Egun ezberdinetan bisitari berberak irratia entzutera bueltatu direlako.
-
-Beraz, honako formula hau erabiliko dugu, bueltan etorri diren bisitari kopurua kalkulatzeko:
-
-Hilabetean eguneko bisita bakarren batura: **{month_visite_uniques}**  
-Hilabeteko bisitak bakarrak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{mont_data['visits_unique']}**  
-{month_visite_uniques} - {mont_data['visits_unique']} = **{rest_month_visit}**
-
-Beraz, kenduketa eginda esan genezake bisitari bakar guztietatik (**{mont_data['visits_unique']}**), **{rest_month_visit}** berriz bueltatu direla **itsuki irratia** entzutera.
+md = f"""
+{_Visits()}
+{_Geos()}
+{_Devices()}
 """
+
+#md = f"""
+#{Md.intro()}
+#{_Visits()}
+#{_Geos()}
+#{_Devices()}
+#{_Outro()}
+#"""
 
 with open(f"report/{since_d}.md", "w") as file:
     file.write(md)

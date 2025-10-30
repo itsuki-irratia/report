@@ -37,19 +37,21 @@ class Report:
         logs   = self.getCache()
 
         if logs == None:
-            logs          = Log.getLines(self.log_file)
+            logs = Log.getLines(self.log_file)
             self.setCache(logs)
 
-        logs          = Log.getByDates(logs, _since, _until, output_mode)
+        logs     = Log.getByDates(logs, _since, _until, output_mode)
 
-        visits        = Visit.get(logs)
-        visits_unique = Visit.getUnique(logs)
+        visits   = Visit.getConnections(logs)
+        unique   = Visit.countUnique(logs)
+        duration = Visit.getDuration(logs)
 
         result = {
-            "since":         since,
-            "until":         until,
-            "visits":        visits,
-            "visits_unique": visits_unique,
+            "since":       since,
+            "until":       until,
+            "connections": visits,
+            "unique":      unique,
+            "duration":    duration
         }
 
         if(output_mode == 'devices'):

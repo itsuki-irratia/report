@@ -39,7 +39,8 @@ class Geo:
 
             return res
         except Exception as e:
-            return get(ip)
+            print(f"ERROR: Geo.get({ip}) {e}")
+            return {}
 
     @staticmethod
     def getCacheFile():
