@@ -14,22 +14,29 @@ class VisitsMonth:
     def __init__(self, log_file):
         self.log_file = log_file
         self.interval = 3600 * 24
-        self.report = Report(log_file)
+        self.report   = Report(log_file)
 
     def get(self, since, until, output_mode):
-        since_date = re.sub(r"\s+[^$]+$", '', since)
+        since_date       = re.sub(r"\s+[^$]+$", '', since)
         self.output_file = f"./build/visits-month-{since_date}.svg"
+
         since_ts = Common.getTimestampFromDateString(since)
         until_ts = Common.getTimestampFromDateString(until)
-        data = []
+        data     = []
+        used     = []
 
+        # ordu aldaketie dala eta trapitxeue ein bizan dot
         for i in range(since_ts, until_ts, self.interval):
-            _since = datetime.fromtimestamp(i).strftime('%Y-%m-%d %H:%M:%S')
-            _until = datetime.fromtimestamp(i + self.interval - 1).strftime('%Y-%m-%d %H:%M:%S')
+            _since = Common.getDateStringFromTimestamp(i)
+            _since = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", " 00:00:00", _since)
+            _until = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", " 23:59:59", _since)
+            if _since in used:
+                continue
 
             output = self.report.get(_since, _until, output_mode)
             print(output)
             data.append(output)
+            used.append(_since)
 
         # Load into DataFrame
         df = pd.DataFrame(data)
