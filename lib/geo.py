@@ -1,6 +1,7 @@
 import os
 import json
 import requests
+import time
 
 script_folder  = os.path.dirname(os.path.abspath(__file__))
 geo_cache_file = f"{script_folder}/geo.cache.json"
@@ -8,39 +9,46 @@ geo_cache_file = f"{script_folder}/geo.cache.json"
 class Geo:
 
     @staticmethod
-    def get(ip):
+    def get(ip, sleep_time = 0):
         _geo = Geo.getCache(ip)
         if _geo != False:
             return _geo
 
         url = f"http://ip-api.com/json/{ip}"
-        try:
-            res = requests.get(url).json()
+        res = requests.get(url)
 
-            if res['status'] != 'success':
-                return {}
-            
-            keys_to_remove = ['status', 'district', 'currency', 'isp', 'org', 'as', 'asname', 'mobile', 'proxy', 'hosting', 'query']
+        print(f"Geo lookup for {ip}: {res.status_code}")
 
-            for key in keys_to_remove:
-                res.pop(key, None)
+        if res.status_code == 429: # too many requests
+            print(f"Too many requests: sleeping for {sleep_time} seconds")
+            time.sleep(sleep_time)
+            return Geo.get(ip, sleep_time + 1)
 
-            if res['regionName'] in ['Navarre', 'Basque Country']:
-                res['country'] = 'Euskal Herria'
-                res['countryCode'] = 'EH'
-            
-            if res['regionName'] == 'Navarre':
-                res['regionName'] = 'Nafarroa'
-
-            if res['regionName'] == 'Basque Country':
-                res['regionName'] = 'Euskal Autonomi Erkidegoa'
-
-            Geo.setCache(ip, res)
-
-            return res
-        except Exception as e:
-            print(f"ERROR: Geo.get({ip}) {e}")
+        elif res.status_code != 200:
             return {}
+        
+        res = res.json()
+        if res['status'] != 'success':
+            return {}
+        
+        keys_to_remove = ['status', 'district', 'currency', 'isp', 'org', 'as', 'asname', 'mobile', 'proxy', 'hosting', 'query']
+
+        for key in keys_to_remove:
+            res.pop(key, None)
+
+        if res['regionName'] in ['Navarre', 'Basque Country']:
+            res['country'] = 'Euskal Herria'
+            res['countryCode'] = 'EH'
+        
+        if res['regionName'] == 'Navarre':
+            res['regionName'] = 'Nafarroa'
+
+        if res['regionName'] == 'Basque Country':
+            res['regionName'] = 'Euskal Autonomi Erkidegoa'
+
+        Geo.setCache(ip, res)
+
+        return res
 
     @staticmethod
     def getCacheFile():
@@ -66,6 +74,7 @@ class Geo:
                 json.dump(j, f, indent=4)
             return True
         except Exception as e:
+            print(f"Error writing geo cache: {e}")
             return False
 
     @staticmethod

@@ -49,20 +49,32 @@ class VisitsMonth:
         fig, ax = plt.subplots(figsize=(12, 6))
 
         # Plot data
-        ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
-        ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
+        connection, = ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
+        unique,     = ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
         ax.set_title(f"{since_date} hilabeteko bisitak")
 
         # Add value labels
         for i, v in enumerate(df["connections"]):
             if v > 0:
                 ax.text(df.index[i], v + 10, str(v), ha='center', va='bottom', fontsize=9,
-                        bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=1.0, edgecolor='none'))
+                        bbox=dict(
+                            boxstyle="round,pad=0.3",
+                            facecolor='white',
+                            alpha=1.0,
+                            edgecolor=connection.get_color(),
+                            linewidth=2
+                        ))
 
         for i, v in enumerate(df["unique"]):
             if v > 0:
-                ax.text(df.index[i], v - 15, str(v), ha='center', va='top', fontsize=9,
-                        bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=1.0, edgecolor='none'))
+                ax.text(df.index[i], v + 5, str(v), ha='center', va='top', fontsize=9,
+                        bbox=dict(
+                            boxstyle="round,pad=0.3",
+                            facecolor='white',
+                            alpha=1.0,
+                            edgecolor=unique.get_color(),
+                            linewidth=2
+                        ))
 
         ax.legend()
         ax.grid(True)

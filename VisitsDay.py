@@ -17,19 +17,28 @@ class VisitsDay:
         self.report = Report(log_file)
 
     def get(self, since, until, output_mode):
-        since_date = re.sub(r"\s+[^$]+$", '', since)
+        since_date       = re.sub(r"\s+[^$]+$", '', since)
         self.output_file = f"./build/visits-day-{since_date}.svg"
-        since_ts = Common.getTimestampFromDateString(since)
-        until_ts = Common.getTimestampFromDateString(until)
-        data = []
 
-        for i in range(since_ts, until_ts, self.interval):
-            _since = datetime.fromtimestamp(i).strftime('%Y-%m-%d %H:%M:%S')
-            _until = datetime.fromtimestamp(i + self.interval - 1).strftime('%Y-%m-%d %H:%M:%S')
+        data     = []
+        used     = []
+        i        = Common.getTimestampFromDateString(since)
+        loop     = True
 
+        while(loop == True):
+            _since = Common.getDateStringFromTimestamp(i)
+            _hour  = re.search(r"^[0-9]{4}\-[0-9]{2}\-[0-9]{2}\s+([0-9]{2}):[0-9]{2}:[0-9]{2}$", _since).group(1)
+            _until = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", f" {_hour}:59:59", _since)
+            if _hour in used:
+                i = i + self.interval
+                continue
             output = self.report.get(_since, _until, output_mode)
             print(output)
             data.append(output)
+            used.append(_hour)
+            i = i + self.interval
+            if int(_hour) == 23:
+                loop = False
 
         # Load into DataFrame
         df = pd.DataFrame(data)
@@ -41,20 +50,32 @@ class VisitsDay:
         # ✅ Correctly unpack fig and ax
         fig, ax = plt.subplots(figsize=(12, 6))
 
-        ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
-        ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
+        connection, = ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
+        unique,     = ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
         ax.set_title(f"{since_date} eguneko bisitak")
 
         # Add value labels with white background
         for i, v in enumerate(df["connections"]):
             if v > 0:
-                ax.text(df.index[i], v - 20, str(v), ha='center', va='bottom', fontsize=9,
-                        bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=1.0, edgecolor='none'))
+                ax.text(df.index[i], v, str(v), ha='center', va='bottom', fontsize=9,
+                        bbox=dict(
+                            boxstyle="round,pad=0.3",
+                            facecolor='white',
+                            alpha=1.0,
+                            edgecolor=connection.get_color(),
+                            linewidth=2
+                        ))
 
         for i, v in enumerate(df["unique"]):
             if v > 0:
-                ax.text(df.index[i], v + 20, str(v), ha='center', va='top', fontsize=9,
-                        bbox=dict(boxstyle="round,pad=0.3", facecolor='white', alpha=1.0, edgecolor='none'))
+                ax.text(df.index[i], v, str(v), ha='center', va='top', fontsize=9,
+                        bbox=dict(
+                            boxstyle="round,pad=0.3",
+                            facecolor='white',
+                            alpha=1.0,
+                            edgecolor=unique.get_color(),
+                            linewidth=2
+                        ))
 
         ax.legend()
         ax.grid(True)

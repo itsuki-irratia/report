@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import calendar
 from collections import OrderedDict
 
 from pprint      import pprint
@@ -22,25 +23,27 @@ r         = Report(log_file)
 width     = r"{ width=100% }"
 
 def _Visits():
+    year          = int(re.search(r"^([0-9]{4})", since).group(1))
+    month         = int(re.search(r"^[0-9]{4}\-([0-9]{2})", since).group(1))
+    day           = int(re.search(r"^[0-9]{4}\-[0-9]{2}\-([0-9]{2})", since).group(1))
+    _, month_days = calendar.monthrange(year, month)
+
     # Hilabeteko bisitak
     mont_data     = r.get(since, until, 'basic')
     duration_data = Visit.duration2Human(mont_data['duration'])
     month_image   = VisitsMonth(log_file).save(since, until, 'basic')
-
     md            = Md.visistsMonth(since_d, mont_data, duration_data, month_image, width)
 
     # Eguneko bisitak
 
-    since_ts             = Common.getTimestampFromDateString(since)
-    until_ts             = Common.getTimestampFromDateString(until)
-    interval             = 3600 * 24
-
     month_visite_uniques = 0
 
-    for i in range(since_ts, until_ts, interval):
-        _since               = Common.getDateStringFromTimestamp(i)
-        _until               = Common.getDateStringFromTimestamp(i+interval-1)
-        _since_d             = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", '', _since)
+    for i in range(day, month_days + 1):
+        _day   = str(i).zfill(2)
+        _since = f"{year}-{month}-{_day} 00:00:00"
+        _until = f"{year}-{month}-{_day} 23:59:59"
+
+        print(f"{_since} {_until}")
 
         day_data             = r.get(_since, _until, 'basic')
         day_image            = VisitsDay(log_file).save(_since, _until, 'basic')
