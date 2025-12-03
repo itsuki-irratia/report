@@ -1,0 +1,11 @@
+/* Force monospace font */
+body {
+    font-family: "DejaVu Sans Mono", monospace;
+    font-size: 12pt; /* your desired equal size */
+    line-height: 1.2;
+}
+
+/* Optional: make headings also monospace */
+h1, h2, h3, h4, h5, h6 {
+    font-family: "DejaVu Sans Mono", monospace;
+}

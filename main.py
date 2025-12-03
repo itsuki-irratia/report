@@ -4,7 +4,6 @@ import re
 import calendar
 from collections import OrderedDict
 
-from pprint      import pprint
 from lib.common  import Common
 from lib.visit   import Visit
 from lib.report  import Report
@@ -50,7 +49,10 @@ def _Visits():
         month_visite_uniques = month_visite_uniques + day_data['unique']
 
         md                   = f"""{md}
-{Md.visistsDay(since_d, day_data, day_image, width)}
+## BISITAK: {since_d}
+        """
+        md                   = f"""{md}
+{Md.visistsDay(f"{since_d}-{_day}", day_data, day_image, width)}
         """
 
     rest_month_visit = month_visite_uniques - mont_data['unique']
@@ -70,11 +72,16 @@ def _Geos():
     country_image = Geos().save('country', since_d, geos_country)
 
     md = f"""
+## GEOLOKALIZAZIOA 
+### HERRIAK
 ![]({city_image}){width}
 <div style="page-break-after: always;"></div>
+### ESKUALDEAK
 ![]({region_image}){width}
 <div style="page-break-after: always;"></div>
+### HERRIALDEAK
 ![]({country_image}){width}
+<div style="page-break-after: always;"></div>
     """
     """
     pprint(geos_city)
@@ -89,6 +96,7 @@ def _Devices():
     devices_image = Devices().save(since_d, devices_data)
 
     md = f"""
+## GAILUAK
 ![]({devices_image}){width}
 <div style="page-break-after: always;"></div>
     """
@@ -99,27 +107,32 @@ def _Devices():
     """
     return md
 
+def _Intro():
+    md = f"""
+# ITSUKI IRRATIAREN<br>BISITA TXOSTENA<br>{since_d}
+<div style="page-break-after: always;"></div>
+    """
+    return md
+
 def _Outro():
-    pass
+    md = f"""
+## KODEA
+https://github.com/itsuki-irratia/report
+    """
+    return md
 
 md = f"""
+{_Intro()}
 {_Visits()}
 {_Geos()}
 {_Devices()}
+{_Outro()}
 """
-
-#md = f"""
-#{Md.intro()}
-#{_Visits()}
-#{_Geos()}
-#{_Devices()}
-#{_Outro()}
-#"""
 
 with open(f"report/{since_d}.md", "w") as file:
     file.write(md)
 
-command = f"/usr/bin/pandoc report/{since_d}.md -f markdown --pdf-engine=weasyprint -o report/{since_d}.pdf"
+command = f"/usr/bin/pandoc report/{since_d}.md -f markdown --pdf-engine=weasyprint --css=md.css -o report/{since_d}.pdf"
 os.system(command)
 
 sys.exit()

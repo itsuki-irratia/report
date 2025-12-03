@@ -65,9 +65,9 @@ Bisitari bakarren kalkulua **OHARRAK** atalean dago.
         return md
 
     @staticmethod
-    def visistsMonth(since_d, mont_data, duration_data, month_image, width):
+    def visistsMonth(since, mont_data, duration_data, month_image, width):
         md = f"""
-## {since_d}
+## {since}
 
 Hilabetean kontsumitutako denbora:  
 **{mont_data['duration']}** segundo, hau da:  
@@ -81,9 +81,9 @@ Bisitari bakarrak: **{mont_data['unique']}**
         return md
 
     @staticmethod
-    def visistsDay(since_d, day_data, day_image, width):
+    def visistsDay(since, day_data, day_image, width):
         md = f"""
-## {since_d}
+## {since}
 
 Konexioak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; **{day_data['connections']}**  
 Bisitari bakarrak: **{day_data['unique']}** 
@@ -115,5 +115,6 @@ Hilabeteko bisitak bakarrak:&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbs
 Beraz, kenduketa eginda esan genezake bisitari bakar guztietatik (**{mont_data['unique']}**), **{rest_month_visit}** berriz bueltatu direla **itsuki irratia** entzutera.
 
 Formula berbera erabil genezake egunekoak kalkulatzeko, baina uste dugu hilabatekoarekin nahikoa dela.
+<div style="page-break-after: always;"></div>
         """
         return md

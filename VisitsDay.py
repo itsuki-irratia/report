@@ -52,7 +52,8 @@ class VisitsDay:
 
         connection, = ax.plot(df.index, df["connections"], marker="o", label="Konexioak")
         unique,     = ax.plot(df.index, df["unique"],      marker="s", label="Bisitari bakarrak")
-        ax.set_title(f"{since_date} eguneko bisitak")
+        #ax.set_title(f"{since_date} eguneko bisitak")
+        ax.set_title('')
 
         # Add value labels with white background
         for i, v in enumerate(df["connections"]):
