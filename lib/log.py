@@ -100,7 +100,7 @@ class Log:
 
     @staticmethod
     def isUserAgentAllowed(user_agent, log):
-        disallowed = ['Go-http-client', 'curl', 'Lavf']
+        disallowed = ['Go-http-client', 'curl', 'Lavf', 'GuzzleHttp']
         for i in disallowed:
             if re.search(rf"^{re.escape(i)}", user_agent, re.IGNORECASE):
                 return False
