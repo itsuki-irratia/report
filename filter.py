@@ -1,4 +1,3 @@
-import sys
 import re
 import json
 from lib.common import Common

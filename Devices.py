@@ -1,12 +1,5 @@
-import re
-import pandas            as     pd
-import matplotlib.pyplot as     plt
-import matplotlib.dates  as     mdates
-from datetime            import datetime
-from matplotlib.ticker   import MultipleLocator
-
-from lib.common          import Common
-from lib.report          import Report
+import pandas            as pd
+import matplotlib.pyplot as plt
 
 class Devices:
 
