@@ -39,18 +39,16 @@ def _Visits():
 
     for i in range(day, month_days + 1):
         _day   = str(i).zfill(2)
-        _since = f"{year}-{month}-{_day} 00:00:00"
-        _until = f"{year}-{month}-{_day} 23:59:59"
+        _month = str(month).zfill(2)
+        _since = f"{year}-{_month}-{_day} 00:00:00"
+        _until = f"{year}-{_month}-{_day} 23:59:59"
 
-        print(f"{_since} {_until}")
+        print(f"{_since} -> {_until}")
 
         day_data             = r.get(_since, _until, 'basic')
         day_image            = VisitsDay(log_file).save(_since, _until, 'basic')
         month_visite_uniques = month_visite_uniques + day_data['unique']
 
-        md                   = f"""{md}
-## BISITAK: {since_d}
-        """
         md                   = f"""{md}
 {Md.visistsDay(f"{since_d}-{_day}", day_data, day_image, width)}
         """

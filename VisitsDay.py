@@ -20,25 +20,23 @@ class VisitsDay:
         since_date       = re.sub(r"\s+[^$]+$", '', since)
         self.output_file = f"./build/visits-day-{since_date}.svg"
 
+        since_ts = Common.getTimestampFromDateString(since)
+        until_ts = Common.getTimestampFromDateString(until)
         data     = []
         used     = []
-        i        = Common.getTimestampFromDateString(since)
-        loop     = True
 
-        while(loop == True):
+        # ordu aldaketie dala eta trapitxeue ein bizan dot
+        for i in range(since_ts, until_ts, self.interval):
             _since = Common.getDateStringFromTimestamp(i)
-            _hour  = re.search(r"^[0-9]{4}\-[0-9]{2}\-[0-9]{2}\s+([0-9]{2}):[0-9]{2}:[0-9]{2}$", _since).group(1)
+            _hour = re.sub(r"[0-9]+\-[0-9]+\-[0-9]+\s+([0-9]+):[0-9]+:[0-9]+", '\\1', _since)
             _until = re.sub(r"\s+[0-9]+:[0-9]+:[0-9]+$", f" {_hour}:59:59", _since)
-            if _hour in used:
-                i = i + self.interval
+            if _since in used:
                 continue
+
             output = self.report.get(_since, _until, output_mode)
             print(output)
             data.append(output)
-            used.append(_hour)
-            i = i + self.interval
-            if int(_hour) == 23:
-                loop = False
+            used.append(_since)
 
         # Load into DataFrame
         df = pd.DataFrame(data)
