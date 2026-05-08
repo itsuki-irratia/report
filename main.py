@@ -10,8 +10,16 @@ from lib.report  import Report
 from VisitsMonth import VisitsMonth
 from VisitsDay   import VisitsDay
 from Geos        import Geos
-from Devices     import Devices
+from GeoDuration import GeoDuration
+from Devices         import Devices
+from DeviceDuration  import DeviceDuration
 from lib.md      import Md
+
+os.makedirs('build', exist_ok=True)
+os.makedirs('report', exist_ok=True)
+if not os.path.exists('lib/geo.cache.json'):
+    with open('lib/geo.cache.json', 'w') as f:
+        f.write('{}')
 
 arguments = Common.getArguments()
 log_file  = arguments['log-file']
@@ -69,8 +77,16 @@ def _Geos():
     region_image  = Geos().save('region',  since_d, geos_region)
     country_image = Geos().save('country', since_d, geos_country)
 
+    dur_city     = OrderedDict(sorted(geo_data['dur_city'].items(),    key=lambda x: x[1], reverse=True)[:20])
+    dur_region   = OrderedDict(sorted(geo_data['dur_region'].items(),  key=lambda x: x[1], reverse=True)[:20])
+    dur_country  = OrderedDict(sorted(geo_data['dur_country'].items(), key=lambda x: x[1], reverse=True)[:20])
+
+    dur_city_image    = GeoDuration().save('city',    since_d, dur_city)
+    dur_region_image  = GeoDuration().save('region',  since_d, dur_region)
+    dur_country_image = GeoDuration().save('country', since_d, dur_country)
+
     md = f"""
-## GEOLOKALIZAZIOA 
+## GEOLOKALIZAZIOA
 ### HERRIAK
 ![]({city_image}){width}
 <div style="page-break-after: always;"></div>
@@ -79,6 +95,15 @@ def _Geos():
 <div style="page-break-after: always;"></div>
 ### HERRIALDEAK
 ![]({country_image}){width}
+<div style="page-break-after: always;"></div>
+### ENTZUNDAKO MINUTUAK - HERRIAK
+![]({dur_city_image}){width}
+<div style="page-break-after: always;"></div>
+### ENTZUNDAKO MINUTUAK - ESKUALDEAK
+![]({dur_region_image}){width}
+<div style="page-break-after: always;"></div>
+### ENTZUNDAKO MINUTUAK - HERRIALDEAK
+![]({dur_country_image}){width}
 <div style="page-break-after: always;"></div>
     """
     """
@@ -89,13 +114,19 @@ def _Geos():
     return md
 
 def _Devices():
-    devices_data  = r.get(since, until, 'devices')['devices']
-    devices_data  = OrderedDict(sorted(devices_data.items(), key=lambda x: x[1], reverse=True))
-    devices_image = Devices().save(since_d, devices_data)
+    devices_result   = r.get(since, until, 'devices')
+    devices_data     = OrderedDict(sorted(devices_result['devices'].items(),          key=lambda x: x[1], reverse=True))
+    devices_dur_data = OrderedDict(sorted(devices_result['devices_duration'].items(), key=lambda x: x[1], reverse=True))
+
+    devices_image     = Devices().save(since_d, devices_data)
+    devices_dur_image = DeviceDuration().save(since_d, devices_dur_data)
 
     md = f"""
 ## GAILUAK
 ![]({devices_image}){width}
+<div style="page-break-after: always;"></div>
+### ENTZUNDAKO MINUTUAK
+![]({devices_dur_image}){width}
 <div style="page-break-after: always;"></div>
     """
     """
@@ -121,7 +152,6 @@ https://github.com/itsuki-irratia/report
 
 md = f"""
 {_Intro()}
-{_Visits()}
 {_Geos()}
 {_Devices()}
 {_Outro()}

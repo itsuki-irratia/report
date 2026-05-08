@@ -78,6 +78,32 @@ class Geo:
             return False
 
     @staticmethod
+    def getDurationByCity(logs):
+        geos = {}
+        for log in logs:
+            key = f"{log['geo']['city']} / {log['geo']['regionName']} / {log['geo']['country']}" \
+                  if 'city' in log['geo'] else '-'
+            geos[key] = geos.get(key, 0) + log.get('duration', 0)
+        return geos
+
+    @staticmethod
+    def getDurationByRegion(logs):
+        geos = {}
+        for log in logs:
+            key = f"{log['geo']['regionName']} / {log['geo']['country']}" \
+                  if 'regionName' in log['geo'] else '-'
+            geos[key] = geos.get(key, 0) + log.get('duration', 0)
+        return geos
+
+    @staticmethod
+    def getDurationByCountry(logs):
+        geos = {}
+        for log in logs:
+            key = log['geo']['country'] if 'country' in log['geo'] else '-'
+            geos[key] = geos.get(key, 0) + log.get('duration', 0)
+        return geos
+
+    @staticmethod
     def getCities(logs):
         ips  = []
         geos = {}

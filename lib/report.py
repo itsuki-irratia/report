@@ -55,7 +55,8 @@ class Report:
         }
 
         if(output_mode == 'devices'):
-            result['devices'] = Device.gets(logs)
+            result['devices']          = Device.gets(logs)
+            result['devices_duration'] = Device.getDurations(logs)
 
         elif(output_mode == 'apps'):
             result['apps']    = App.gets(logs)
@@ -64,6 +65,9 @@ class Report:
             result['geos_city']    = Geo.getCities(logs)
             result['geos_region']  = Geo.getRegions(logs)
             result['geos_country'] = Geo.getCountries(logs)
+            result['dur_city']     = Geo.getDurationByCity(logs)
+            result['dur_region']   = Geo.getDurationByRegion(logs)
+            result['dur_country']  = Geo.getDurationByCountry(logs)
 
         elif(output_mode == 'full'):
             result['visits_ogg']   = Visit.getOgg(logs)

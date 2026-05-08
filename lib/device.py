@@ -1,4 +1,8 @@
 import re
+import json
+import os
+
+OTHERS_FILE = 'lib/device.others.json'
 
 class Device:
 
@@ -28,7 +32,10 @@ class Device:
         elif re.search(r"Lavf",           user_agent, re.IGNORECASE):
             return 'lavf'
         else:
-            print(user_agent)
+            others = json.load(open(OTHERS_FILE)) if os.path.exists(OTHERS_FILE) else []
+            if user_agent not in others:
+                others.append(user_agent)
+                json.dump(others, open(OTHERS_FILE, 'w'), indent=2)
             return 'web / other'
 
     @staticmethod
@@ -41,3 +48,11 @@ class Device:
             else:
                 devices[device] = 1
         return devices
+
+    @staticmethod
+    def getDurations(logs):
+        durations = {}
+        for log in logs:
+            device = log['device']
+            durations[device] = durations.get(device, 0) + log.get('duration', 0)
+        return durations
