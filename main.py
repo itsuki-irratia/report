@@ -152,6 +152,7 @@ https://github.com/itsuki-irratia/report
 
 md = f"""
 {_Intro()}
+{_Visits()}
 {_Geos()}
 {_Devices()}
 {_Outro()}
