@@ -14,6 +14,7 @@ from GeoDuration import GeoDuration
 from Devices         import Devices
 from DeviceDuration  import DeviceDuration
 from lib.md      import Md
+from lib.hack    import Hack
 
 os.makedirs('build', exist_ok=True)
 os.makedirs('report', exist_ok=True)
@@ -136,6 +137,11 @@ def _Devices():
     """
     return md
 
+def _Hack():
+    hack_data = Hack.getGroupedUrisByIp(log_file)
+    md        = Md.hack(hack_data)
+    return md
+
 def _Intro():
     md = f"""
 # ITSUKI IRRATIAREN<br>BISITA TXOSTENA<br>{since_d}
@@ -155,6 +161,7 @@ md = f"""
 {_Visits()}
 {_Geos()}
 {_Devices()}
+{_Hack()}
 {_Outro()}
 """
 

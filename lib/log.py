@@ -57,7 +57,7 @@ class Log:
             request    = log['request']
             user_agent = Log.getUserAgent(log)
 
-            if Log.isUserAgentAllowed(user_agent, log) == False:
+            if Log.isUserAgentAllowed(user_agent) == False:
                 continue
 
             if Log.isUriAllowed(request['uri']) == False:
@@ -99,7 +99,7 @@ class Log:
         return False
 
     @staticmethod
-    def isUserAgentAllowed(user_agent, log):
+    def isUserAgentAllowed(user_agent):
         disallowed = ['Go-http-client', 'curl', 'Lavf', 'GuzzleHttp']
         for i in disallowed:
             if re.search(rf"^{re.escape(i)}", user_agent, re.IGNORECASE):

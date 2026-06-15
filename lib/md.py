@@ -118,3 +118,35 @@ Formula berbera erabil genezake egunekoak kalkulatzeko, baina uste dugu hilabate
 <div style="page-break-after: always;"></div>
         """
         return md
+
+    @staticmethod
+    def hack(hack_data):
+        lines = [
+            "## HACK",
+            "",
+            f"HACK SAIAKERAK: **{len(hack_data)}**",
+        ]
+
+        if len(hack_data) == 0:
+            lines.extend([
+                "",
+                "Ez da sarrerarik aurkitu.",
+                '<div style="page-break-after: always;"></div>',
+            ])
+            return "\n".join(lines)
+
+        for item in hack_data:
+            lines.extend([
+                "",
+                f"### {item['IP']}",
+            ])
+
+            for uri in item['uris']:
+                lines.append(f"- `{uri}`")
+
+        lines.extend([
+            "",
+            '<div style="page-break-after: always;"></div>',
+        ])
+
+        return "\n".join(lines)
