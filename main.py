@@ -9,9 +9,7 @@ from lib.visit   import Visit
 from lib.report  import Report
 from VisitsMonth import VisitsMonth
 from VisitsDay   import VisitsDay
-from Geos        import Geos
 from GeoDuration import GeoDuration
-from Devices         import Devices
 from DeviceDuration  import DeviceDuration
 from lib.md      import Md
 from lib.hack    import Hack
@@ -70,14 +68,6 @@ def _Visits():
 
 def _Geos():
     geo_data      = r.get(since, until, 'geos')
-    geos_city     = OrderedDict(sorted(geo_data['geos_city'].items(),    key=lambda x: x[1], reverse=True)[:20])
-    geos_region   = OrderedDict(sorted(geo_data['geos_region'].items(),  key=lambda x: x[1], reverse=True)[:20])
-    geos_country  = OrderedDict(sorted(geo_data['geos_country'].items(), key=lambda x: x[1], reverse=True)[:20])
-
-    city_image    = Geos().save('city',    since_d, geos_city)
-    region_image  = Geos().save('region',  since_d, geos_region)
-    country_image = Geos().save('country', since_d, geos_country)
-
     dur_city     = OrderedDict(sorted(geo_data['dur_city'].items(),    key=lambda x: x[1], reverse=True)[:20])
     dur_region   = OrderedDict(sorted(geo_data['dur_region'].items(),  key=lambda x: x[1], reverse=True)[:20])
     dur_country  = OrderedDict(sorted(geo_data['dur_country'].items(), key=lambda x: x[1], reverse=True)[:20])
@@ -88,15 +78,6 @@ def _Geos():
 
     md = f"""
 ## GEOLOKALIZAZIOA
-### HERRIAK
-![]({city_image}){width}
-<div style="page-break-after: always;"></div>
-### ESKUALDEAK
-![]({region_image}){width}
-<div style="page-break-after: always;"></div>
-### HERRIALDEAK
-![]({country_image}){width}
-<div style="page-break-after: always;"></div>
 ### ENTZUNDAKO MINUTUAK - HERRIAK
 ![]({dur_city_image}){width}
 <div style="page-break-after: always;"></div>
@@ -116,16 +97,12 @@ def _Geos():
 
 def _Devices():
     devices_result   = r.get(since, until, 'devices')
-    devices_data     = OrderedDict(sorted(devices_result['devices'].items(),          key=lambda x: x[1], reverse=True))
     devices_dur_data = OrderedDict(sorted(devices_result['devices_duration'].items(), key=lambda x: x[1], reverse=True))
 
-    devices_image     = Devices().save(since_d, devices_data)
     devices_dur_image = DeviceDuration().save(since_d, devices_dur_data)
 
     md = f"""
 ## GAILUAK
-![]({devices_image}){width}
-<div style="page-break-after: always;"></div>
 ### ENTZUNDAKO MINUTUAK
 ![]({devices_dur_image}){width}
 <div style="page-break-after: always;"></div>

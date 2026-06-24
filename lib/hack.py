@@ -6,15 +6,19 @@ from collections import OrderedDict
 class Hack:
 
     EXCLUDED_PATTERNS = [
-        r".opus",
-        r".aac",
-        r"listeners-online.json",
+        r"\.opus",
+        r"\.aac",
+        r"\.mp3",
+        r"\.ogg",
+        r"listeners\-online\.json",
         r"robots.txt",
         r"\"uri\":\"/\"",
-        r"itsuki.ogg",
-        r".png",
-        r"itsuki-stats.json",
-        r".ico",
+        r"\.png",
+        r"itsuki\-stats\.json",
+        r"\.ico",
+        r"\/custom\/",
+        r"fbclid=",
+        r"\/zuzenean"
     ]
 
     @staticmethod
@@ -24,6 +28,16 @@ class Hack:
                 return True
 
         return False
+
+    @staticmethod
+    def getUserAgent(request):
+        headers = request.get('headers', {})
+        user_agent = headers.get('User-Agent', '-')
+
+        if isinstance(user_agent, list):
+            return user_agent[0] if len(user_agent) > 0 else '-'
+
+        return user_agent or '-'
 
     @staticmethod
     def getGroupedUrisByIp(log_file):
@@ -43,18 +57,27 @@ class Hack:
                     request = data.get('request', {})
                     uri = request.get('uri', '-')
                     remote_ip = request.get('remote_ip', '-')
+                    user_agent = Hack.getUserAgent(request)
                     if remote_ip not in grouped:
-                        grouped[remote_ip] = []
+                        grouped[remote_ip] = {
+                            'uris': [],
+                            'requests': [],
+                        }
 
-                    grouped[remote_ip].append(uri)
+                    grouped[remote_ip]['uris'].append(uri)
+                    grouped[remote_ip]['requests'].append({
+                        'uri': uri,
+                        'user_agent': user_agent,
+                    })
                 except json.JSONDecodeError as error:
                     raise ValueError(f"invalid json on line {line_number}") from error
 
         result = []
-        for remote_ip, uris in grouped.items():
+        for remote_ip, data in grouped.items():
             result.append({
                 "IP": remote_ip,
-                "uris": uris,
+                "uris": data['uris'],
+                "requests": data['requests'],
             })
 
         return result

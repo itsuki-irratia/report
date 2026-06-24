@@ -141,8 +141,15 @@ Formula berbera erabil genezake egunekoak kalkulatzeko, baina uste dugu hilabate
                 f"### {item['IP']}",
             ])
 
-            for uri in item['uris']:
+            requests = item.get('requests')
+            if requests is None:
+                requests = [{"uri": uri, "user_agent": "-"} for uri in item['uris']]
+
+            for request in requests:
+                uri = request.get('uri', '-')
+                user_agent = request.get('user_agent', '-')
                 lines.append(f"- `{uri}`")
+                lines.append(f"  User-Agent: `{user_agent}`")
 
         lines.extend([
             "",

@@ -1,5 +1,5 @@
 #!/bin/bash
-python 3 -m venv venv
+python -m venv venv
 source venv/bin/activate.fish
 python3 main.py --log-file="2025-09.log" --since="2025-09-01 00:00:00" --until="2025-09-30 23:59:59"
 python3 main.py --log-file="2025-10.log" --since="2025-10-01 00:00:00" --until="2025-10-31 23:59:59"

@@ -57,9 +57,6 @@ class Log:
             request    = log['request']
             user_agent = Log.getUserAgent(log)
 
-            if Log.isUserAgentAllowed(user_agent) == False:
-                continue
-
             if Log.isUriAllowed(request['uri']) == False:
                 continue
 
